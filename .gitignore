@@ -1,0 +1,8 @@
+venv/
+test/
+
+*.txt
+
+.vimrc
+
+
