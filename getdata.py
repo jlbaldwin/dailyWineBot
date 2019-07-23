@@ -1,28 +1,102 @@
 import requests
 import os
+import random
+import requests
+import json
+import tweepy
+import logging
+import getdata
 
-snooth_key = os.getenv("SNOOTH_KEY")
-ip_add = os.getenv("IP")
-
-address = "http://api.snooth.com/wines/"
-key = "?akey=" + snooth_key 
-ip = "&ip=" + ip_add
-t = "&t=wine"   #return only wine
-n = "&n=3"      #number of results to return
-mr = "&mr=3"
-lang = "&lang=en"
-
-req_string = address + key + ip + t + n + mr + lang 
+logger = logging.getLogger()
 
 
-print(req_string)
+#-------------------------------------------------------------------------------------
+#create_api_obj()
+#Description:
+#	Create tweepy object to interact with twitter. Verify twitter credentials.
+#Returns: api_obj 
+#-------------------------------------------------------------------------------------
+def create_api_obj():
+    consumer_key = os.getenv("CONSUMER_KEY")
+    consumer_secret = os.getenv("CONSUMER_SECRET")
+    access_token = os.getenv("ACCESS_TOKEN")
+    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+    
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
 
-#req = requests.get(req_string)
-#print(req.text)
+    api_obj = tweepy.API(auth)
 
-#open and save to file
-#result = open("req_result.txt", "w")
-#result.write(req.text)
-#result.close
+    try:
+        api_obj.verify_credentials()
+    except Exception as e:
+        logger.error("Error verifying credentials for API creation.", exc_info=True)
+        raise e
+
+    logger.info("API object created ok.")
+
+    return api_obj
 
 
+#-------------------------------------------------------------------------------------
+#create_tweet_data()
+#Description:
+#	Builds Snooth GET request using a random selection of wine color and SnoothRank. 
+#	The GET request returns up to 'wine_ct' number of wines, if available in the
+#	Snooth API. From those wines, a single wine is randomly selected to be tweeted. 
+#Returns: tweet_text => multi line text of wine info
+#-------------------------------------------------------------------------------------
+def create_tweet_data():
+	snooth_key = os.getenv("SNOOTH_KEY")
+	ip_addr = os.getenv("IP")
+	wine_ct = 10					#number of wines to request from Snooth API
+
+	#---------------------------------------------------------------------------------
+	#constant GET components
+	#---------------------------------------------------------------------------------
+	address = "http://api.snooth.com/wines/"
+	key = "?akey=" + snooth_key 
+	ip = "&ip=" + ip_addr
+	t = "&t=wine"   				#return only wine
+	n = "&n=" + str(wine_ct)		#number of results to return, default is 10 per API
+	a = "&a=0"						#0 returns all wines, regardless of in stock or not
+	lang = "&lang=en"
+
+
+	#---------------------------------------------------------------------------------
+	#variable GET components
+	#---------------------------------------------------------------------------------
+	color = "&color=" + random.choice(["Red", "White", "Rose"])
+
+	rank = random.choice([2.5, 3.0, 3.5, 4.0, 4.5])
+	mr = "&mr=" + str(rank)			#min ranking
+	mx = "&mx="	+ str(rank + .5)	#max ranking
+
+	req_string = address + key + ip + t + n + a + lang + mr + mx + color 
+
+	#print("Req string to be sent:")
+	#print(req_string)
+
+
+	#---------------------------------------------------------------------------------
+	#request data from Snooth
+	#---------------------------------------------------------------------------------
+	request_data = requests.get(req_string)
+	response = json.loads(request_data.text)
+
+
+	#---------------------------------------------------------------------------------
+	#build tweet from requested data
+	#---------------------------------------------------------------------------------
+	#add variability to the selection by randomly choosing from the returned results
+	returned_val = response['meta']['returned']
+	wine_selection = random.randint(0, returned_val - 1)
+
+	line1 = response['wines'][wine_selection]['name'] + " " + response['wines'][wine_selection]['vintage']
+	line2 = "Region: " + response['wines'][wine_selection]['region']
+	line3 = "Varietal: " + response['wines'][wine_selection]['varietal']
+	line4 = "More info: " + response['wines'][wine_selection]['link']
+
+	tweet_text = f'{line1}\n{line2}\n{line3}\n{line4}'
+
+	return tweet_text
