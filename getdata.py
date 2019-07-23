@@ -1,4 +1,3 @@
-import requests
 import os
 import random
 import requests
@@ -57,7 +56,7 @@ def create_tweet_data():
 	address = "http://api.snooth.com/wines/"
 	key = "?akey=" + snooth_key 
 	ip = "&ip=" + ip_addr
-	t = "&t=wine"   				#return only wine
+	t = "&t=wine"					#return only wine
 	n = "&n=" + str(wine_ct)		#number of results to return, default is 10 per API
 	a = "&a=0"						#0 returns all wines, regardless of in stock or not
 	lang = "&lang=en"
