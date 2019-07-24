@@ -5,6 +5,7 @@ import json
 import tweepy
 import logging
 import getdata
+from config import *
 
 logger = logging.getLogger()
 
@@ -16,13 +17,8 @@ logger = logging.getLogger()
 #Returns: api_obj 
 #-------------------------------------------------------------------------------------
 def create_api_obj():
-    consumer_key = os.getenv("CONSUMER_KEY")
-    consumer_secret = os.getenv("CONSUMER_SECRET")
-    access_token = os.getenv("ACCESS_TOKEN")
-    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
-    
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
     api_obj = tweepy.API(auth)
 
@@ -46,16 +42,14 @@ def create_api_obj():
 #Returns: tweet_text => multi line text of wine info
 #-------------------------------------------------------------------------------------
 def create_tweet_data():
-	snooth_key = os.getenv("SNOOTH_KEY")
-	ip_addr = os.getenv("IP")
-	wine_ct = 10					#number of wines to request from Snooth API
+	wine_ct = 30					#number of wines to request from Snooth API
 
 	#---------------------------------------------------------------------------------
 	#constant GET components
 	#---------------------------------------------------------------------------------
 	address = "http://api.snooth.com/wines/"
-	key = "?akey=" + snooth_key 
-	ip = "&ip=" + ip_addr
+	key = "?akey=" + SNOOTH_KEY#snooth_key 
+	ip = "&ip=" + IP#ip_addr
 	t = "&t=wine"					#return only wine
 	n = "&n=" + str(wine_ct)		#number of results to return, default is 10 per API
 	a = "&a=0"						#0 returns all wines, regardless of in stock or not
