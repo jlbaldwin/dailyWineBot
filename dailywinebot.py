@@ -2,7 +2,7 @@ import tweepy
 from getdata import create_api_obj, create_tweet_data
 
 #-------------------------------------------------------------------------------------
-#Create tweepy api object to interact with twitter. create_tweet_text hits Snooth API
+#Create tweepy api object to interact with twitter. create_tweet_data hits Snooth API
 #   to create tweet content. update_status send tweet.
 #-------------------------------------------------------------------------------------
 def main():
