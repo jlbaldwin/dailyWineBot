@@ -20,7 +20,7 @@ Procfile includes the worker command run daily via Scheduler.
 The worker command executes dailywinebot.py which calls getdata.py
 
 ## Thanks
-This app tweets data provided from Snooth, an online community wine lovers. Links for info:
+This app tweets data provided from Snooth, an online community for wine lovers. Links for info:
 [Snooth.com](http://www.snooth.com/)
 [Snooth API](https://api.snooth.com/)
 
