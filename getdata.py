@@ -5,10 +5,8 @@ import json
 import tweepy
 import logging
 import getdata
-from config import *
 
-logger = logging.getLogger()
-
+logging.basicConfig(filename='winelog.log', level=logging.DEBUG)
 
 #-------------------------------------------------------------------------------------
 #create_api_obj()
@@ -17,20 +15,22 @@ logger = logging.getLogger()
 #Returns: api_obj 
 #-------------------------------------------------------------------------------------
 def create_api_obj():
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+	CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
+	CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
+	ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
+	ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
 
-    api_obj = tweepy.API(auth)
+	auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+	auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
-    try:
-        api_obj.verify_credentials()
-    except Exception as e:
-        logger.error("Error verifying credentials for API creation.", exc_info=True)
-        raise e
+	api_obj = tweepy.API(auth)
 
-    logger.info("API object created ok.")
-
-    return api_obj
+	try:
+		api_obj.verify_credentials()
+	except:
+		logging.error("Error verifying credentials for API creation.")
+	
+	return api_obj
 
 
 #-------------------------------------------------------------------------------------
@@ -44,12 +44,15 @@ def create_api_obj():
 def create_tweet_data():
 	wine_ct = 30					#number of wines to request from Snooth API
 
+	IP = os.environ.get('IP')
+	SNOOTH_KEY = os.environ.get('SNOOTH_KEY')
+
 	#---------------------------------------------------------------------------------
 	#constant GET components
 	#---------------------------------------------------------------------------------
 	address = "http://api.snooth.com/wines/"
-	key = "?akey=" + SNOOTH_KEY#snooth_key 
-	ip = "&ip=" + IP#ip_addr
+	key = "?akey=" + SNOOTH_KEY 
+	ip = "&ip=" + IP
 	t = "&t=wine"					#return only wine
 	n = "&n=" + str(wine_ct)		#number of results to return, default is 10 per API
 	a = "&a=0"						#0 returns all wines, regardless of in stock or not
@@ -66,9 +69,6 @@ def create_tweet_data():
 	mx = "&mx="	+ str(rank + .5)	#max ranking
 
 	req_string = address + key + ip + t + n + a + lang + mr + mx + color 
-
-	#print("Req string to be sent:")
-	#print(req_string)
 
 
 	#---------------------------------------------------------------------------------
